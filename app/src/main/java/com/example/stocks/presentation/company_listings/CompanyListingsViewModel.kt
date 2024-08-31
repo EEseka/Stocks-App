@@ -49,26 +49,27 @@ class CompanyListingsViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             stockRepository.getCompanyListings(fetchFromRemote, query).collect { result ->
-                withContext(Dispatchers.Main) {}
-                when (result) {
-                    is Resource.Success -> {
-                        result.data?.let { listings ->
+                withContext(Dispatchers.Main) {
+                    when (result) {
+                        is Resource.Success -> {
+                            result.data?.let { listings ->
+                                _state.value = _state.value.copy(
+                                    companies = listings
+                                )
+                            }
+                        }
+
+                        is Resource.Error -> {
                             _state.value = _state.value.copy(
-                                companies = listings
+                                error = result.message
                             )
                         }
-                    }
 
-                    is Resource.Error -> {
-                        _state.value = _state.value.copy(
-                            error = result.message
-                        )
-                    }
-
-                    is Resource.Loading -> {
-                        _state.value = _state.value.copy(
-                            isLoading = result.isLoading
-                        )
+                        is Resource.Loading -> {
+                            _state.value = _state.value.copy(
+                                isLoading = result.isLoading
+                            )
+                        }
                     }
                 }
             }
